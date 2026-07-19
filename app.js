@@ -70,7 +70,7 @@
       var imgWrap = document.createElement("div");
       imgWrap.className = "bug-card__img-wrap";
       var img = document.createElement("img");
-      img.src = escapeHtml(bug.image);
+      img.src = bug.image;
       img.alt = escapeHtml(bug.title);
       img.loading = "lazy";
       img.onerror = function () {
