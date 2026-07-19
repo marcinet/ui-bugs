@@ -4,16 +4,6 @@
 (function () {
   "use strict";
 
-  /* ── helpers ─────────────────────────────────────────────────── */
-
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
   /** Collect every unique category that appears in BUGS, sorted A-Z. */
   function allCategories(bugs) {
     const set = new Set();
@@ -71,7 +61,7 @@
       imgWrap.className = "bug-card__img-wrap";
       var img = document.createElement("img");
       img.src = bug.image;
-      img.alt = escapeHtml(bug.title);
+      img.alt = bug.title;
       img.loading = "lazy";
       img.onerror = function () {
         imgWrap.classList.add("bug-card__img-wrap--missing");
