@@ -1,90 +1,135 @@
-(() => {
-  const SEVERITY_LABEL = { high: "High", medium: "Medium", low: "Low" };
+/* app.js — rendering & category-filter logic.
+   Data is defined in bugs.js (loaded before this file). */
 
-  function renderBugCard(bug) {
-    const card = document.createElement("article");
-    card.className = `bug-card severity-${bug.severity}`;
+(function () {
+  "use strict";
 
-    card.innerHTML = `
-      <div class="bug-card__header">
-        <span class="bug-card__category">${escapeHtml(bug.category)}</span>
-        <span class="bug-card__severity severity-badge severity-badge--${bug.severity}">${SEVERITY_LABEL[bug.severity]}</span>
-      </div>
-      <h2 class="bug-card__title">${escapeHtml(bug.title)}</h2>
-      <p class="bug-card__description">${escapeHtml(bug.description)}</p>
-      <time class="bug-card__date" datetime="${escapeHtml(bug.date)}">${formatDate(bug.date)}</time>
-    `;
-
-    return card;
+  /** Collect every unique category that appears in BUGS, sorted A-Z. */
+  function allCategories(bugs) {
+    const set = new Set();
+    bugs.forEach(function (bug) {
+      bug.categories.forEach(function (c) { set.add(c); });
+    });
+    return Array.from(set).sort();
   }
 
-  function formatDate(dateStr) {
-    const d = new Date(dateStr + "T00:00:00");
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  }
+  /* ── render filters ──────────────────────────────────────────── */
 
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
+  function renderFilters(categories, activeFilter, onSelect) {
+    var container = document.getElementById("filters");
+    container.innerHTML = "";
 
-  function filterBugs(list, { search, severity, category }) {
-    return list.filter((bug) => {
-      const matchSearch =
-        !search ||
-        bug.title.toLowerCase().includes(search) ||
-        bug.description.toLowerCase().includes(search);
-      const matchSeverity = !severity || bug.severity === severity;
-      const matchCategory = !category || bug.category === category;
-      return matchSearch && matchSeverity && matchCategory;
+    var allBtn = document.createElement("button");
+    allBtn.className = "filter-btn" + (activeFilter === null ? " active" : "");
+    allBtn.textContent = "All";
+    allBtn.addEventListener("click", function () { onSelect(null); });
+    container.appendChild(allBtn);
+
+    categories.forEach(function (cat) {
+      var btn = document.createElement("button");
+      btn.className = "filter-btn" + (activeFilter === cat ? " active" : "");
+      btn.textContent = cat;
+      btn.addEventListener("click", function () { onSelect(cat); });
+      container.appendChild(btn);
     });
   }
 
-  function render() {
-    const grid = document.getElementById("bug-grid");
-    const emptyState = document.getElementById("empty-state");
-    const search = document.getElementById("search").value.trim().toLowerCase();
-    const severity = document.getElementById("filter-severity").value;
-    const category = document.getElementById("filter-category").value;
+  /* ── render gallery ──────────────────────────────────────────── */
 
-    const filtered = filterBugs(bugs, { search, severity, category });
+  function renderGallery(bugs, activeFilter) {
+    var container = document.getElementById("gallery");
+    container.innerHTML = "";
 
-    grid.innerHTML = "";
+    var visible = activeFilter
+      ? bugs.filter(function (b) { return b.categories.indexOf(activeFilter) !== -1; })
+      : bugs;
 
-    if (filtered.length === 0) {
-      emptyState.hidden = false;
-    } else {
-      emptyState.hidden = true;
-      filtered.forEach((bug) => grid.appendChild(renderBugCard(bug)));
+    if (visible.length === 0) {
+      var empty = document.createElement("p");
+      empty.className = "empty-message";
+      empty.textContent = "No bugs found for the selected category.";
+      container.appendChild(empty);
+      return;
     }
 
-    document.getElementById("bug-count").textContent =
-      filtered.length === bugs.length
-        ? `${bugs.length} bug${bugs.length !== 1 ? "s" : ""}`
-        : `${filtered.length} of ${bugs.length} bug${bugs.length !== 1 ? "s" : ""}`;
-  }
+    visible.forEach(function (bug) {
+      var card = document.createElement("article");
+      card.className = "bug-card";
 
-  function populateCategoryFilter() {
-    const select = document.getElementById("filter-category");
-    const categories = [...new Set(bugs.map((b) => b.category))].sort();
-    categories.forEach((cat) => {
-      const opt = document.createElement("option");
-      opt.value = cat;
-      opt.textContent = cat;
-      select.appendChild(opt);
+      /* image */
+      var imgWrap = document.createElement("div");
+      imgWrap.className = "bug-card__img-wrap";
+      var img = document.createElement("img");
+      img.src = bug.image;
+      img.alt = bug.title;
+      img.loading = "lazy";
+      img.onerror = function () {
+        imgWrap.classList.add("bug-card__img-wrap--missing");
+        img.remove();
+        var placeholder = document.createElement("span");
+        placeholder.className = "bug-card__img-placeholder";
+        placeholder.textContent = "Image not found";
+        imgWrap.appendChild(placeholder);
+      };
+      imgWrap.appendChild(img);
+      card.appendChild(imgWrap);
+
+      /* body */
+      var body = document.createElement("div");
+      body.className = "bug-card__body";
+
+      var title = document.createElement("h2");
+      title.className = "bug-card__title";
+      title.textContent = bug.title;
+      body.appendChild(title);
+
+      var desc = document.createElement("p");
+      desc.className = "bug-card__description";
+      desc.textContent = bug.description;
+      body.appendChild(desc);
+
+      /* categories */
+      var tagList = document.createElement("ul");
+      tagList.className = "bug-card__tags";
+      bug.categories.forEach(function (cat) {
+        var tag = document.createElement("li");
+        tag.className = "bug-card__tag";
+        tag.textContent = cat;
+        tagList.appendChild(tag);
+      });
+      body.appendChild(tagList);
+
+      card.appendChild(body);
+      container.appendChild(card);
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    populateCategoryFilter();
-    render();
+  /* ── bootstrap ───────────────────────────────────────────────── */
 
-    document.getElementById("search").addEventListener("input", render);
-    document.getElementById("filter-severity").addEventListener("change", render);
-    document.getElementById("filter-category").addEventListener("change", render);
-  });
+  function init() {
+    if (typeof BUGS === "undefined" || !Array.isArray(BUGS)) {
+      document.getElementById("gallery").innerHTML =
+        '<p class="empty-message">Error: bugs.js not loaded or BUGS is not defined.</p>';
+      return;
+    }
+
+    var categories = allCategories(BUGS);
+    var activeFilter = null;
+
+    function refresh() {
+      renderFilters(categories, activeFilter, function (cat) {
+        activeFilter = cat;
+        refresh();
+      });
+      renderGallery(BUGS, activeFilter);
+    }
+
+    refresh();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
