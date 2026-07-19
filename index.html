@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI Bugs Gallery</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>UI Bugs Gallery</h1>
+    <p>A curated collection of interesting UI bugs and visual glitches</p>
+  </header>
+
+  <main class="site-main">
+    <!-- Filter buttons are injected here by app.js -->
+    <div id="filters" class="filters"></div>
+
+    <!-- Bug cards are injected here by app.js -->
+    <div id="gallery" class="gallery"></div>
+  </main>
+
+  <!--
+    bugs.js  — Edit this file to add, remove, or update bug entries.
+               Each entry needs: id, title, description, image, categories.
+               See the comments at the top of bugs.js for the full format.
+
+    app.js   — Rendering and filter logic. No need to touch this file.
+  -->
+  <script src="bugs.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
