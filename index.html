@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI Bugs Gallery</title>
+  <meta name="description" content="A curated gallery of UI bugs encountered in the wild." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>🐛 UI Bugs Gallery</h1>
+    <p>A curated collection of UI bugs encountered in the wild.</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <input
+        id="search"
+        class="controls__search"
+        type="search"
+        placeholder="Search bugs…"
+        aria-label="Search bugs"
+      />
+      <select id="filter-severity" aria-label="Filter by severity">
+        <option value="">All severities</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <select id="filter-category" aria-label="Filter by category">
+        <option value="">All categories</option>
+      </select>
+      <span id="bug-count" class="controls__count" aria-live="polite"></span>
+    </div>
+
+    <div id="bug-grid" class="bug-grid" role="list" aria-label="Bug cards"></div>
+
+    <div id="empty-state" class="empty-state" hidden>
+      <p>No bugs match your filters. Try adjusting your search.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>UI Bugs Gallery — open source on GitHub</p>
+  </footer>
+
+  <script src="bugs.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
